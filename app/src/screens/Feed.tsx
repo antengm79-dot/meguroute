@@ -1,6 +1,6 @@
 import { useState } from "react";
 import RouteCard from "../components/RouteCard";
-import { TabBar, Top } from "../components/ui";
+import { Top } from "../components/ui";
 import { FEED, userById } from "../data/routes";
 import { meUser, myRoutes } from "../lib/myRoutes";
 import { useStore } from "../store";
@@ -25,7 +25,6 @@ export default function Feed() {
           {!list.length && <p className="t-muted" style={{ textAlign: "center" }}>フォロー中の人のルートはまだありません</p>}
         </div>
       </div>
-      <TabBar />
     </div>
   );
 }

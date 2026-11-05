@@ -7,13 +7,13 @@ import { frameById } from "../data/themes";
 import type { PublicRoute, User } from "../data/routes";
 import { useStore } from "../store";
 
-export function MiniRoute({ path, spots, h = 150 }: { path: LngLat[]; spots?: LngLat[]; h?: number }) {
-  const W = 300;
+export function MiniRoute({ path, spots, h = 150, w = 300 }: { path: LngLat[]; spots?: LngLat[]; h?: number; w?: number }) {
+  const W = w;
   const uid = useId().replace(/[^a-zA-Z0-9]/g, "");
   if (path.length < 2) return <div style={{ height: h }} />;
   const [[x0, y0], [x1, y1]] = bounds(path);
   const kx = Math.cos((((y0 + y1) / 2) * Math.PI) / 180);
-  const pad = 24;
+  const pad = Math.min(24, W * 0.12, h * 0.15);
   const sc = Math.min((W - pad * 2) / ((x1 - x0) * kx || 1e-6), (h - pad * 2) / ((y1 - y0) || 1e-6));
   const ox = (W - (x1 - x0) * kx * sc) / 2, oy = (h - (y1 - y0) * sc) / 2;
   const P = ([x, y]: LngLat) => `${(ox + (x - x0) * kx * sc).toFixed(1)},${(oy + (y1 - y) * sc).toFixed(1)}`;

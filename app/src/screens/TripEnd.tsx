@@ -4,7 +4,7 @@ import MapView from "../components/MapView";
 import Icon from "../components/Icon";
 import { LvBadge, PinChara } from "../components/ui";
 import { fmtDist, lineLength, sliceTo, type LngLat } from "../lib/geo";
-import { levelOf, XP_PER_LEVEL } from "../data/themes";
+import { levelInfo, levelOf, tripXp } from "../data/themes";
 import { theme, useStore } from "../store";
 
 export default function TripEnd() {
@@ -20,7 +20,7 @@ export default function TripEnd() {
   const len = lineLength(walked);
   const visited = trip?.visited.length ?? 0;
   const photos = trip?.photos.length ?? 0;
-  const gained = trip?.xpGained ?? Math.round((len / 1000) * 20 + visited * 15 + photos * 3);
+  const gained = trip?.xpGained ?? tripXp(len, visited, photos);
   const xpBefore = s.xp - (trip?.xpGained ? gained : 0);
   const lvBefore = levelOf(xpBefore);
   const lvAfter = levelOf(xpBefore + gained);
@@ -88,7 +88,7 @@ export default function TripEnd() {
         <div className="row" style={{ marginTop: 16, gap: 12 }}>
           <LvBadge lv={levelOf(xpNow)} />
           <div className="grow">
-            <div className="progress xpbar"><div style={{ width: `${((xpNow % XP_PER_LEVEL) / XP_PER_LEVEL) * 100}%` }} /></div>
+            <div className="progress xpbar"><div style={{ width: `${(levelInfo(xpNow).cur / levelInfo(xpNow).need) * 100}%` }} /></div>
           </div>
           <b style={{ fontFamily: "var(--en)", fontSize: 13, color: "var(--base)" }}>+{gained}XP</b>
         </div>

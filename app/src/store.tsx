@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 import type { LngLat } from "./lib/geo";
 import { THEMES } from "./data/themes";
+import { PAST_TRIPS } from "./data/pastTrips";
 
 export type Visibility = "public" | "friends" | "private";
 
@@ -93,12 +94,12 @@ export const defaultPlan = (): Plan => ({
 const initial: State = {
   themeId: "mint",
   frameId: "accent",
-  xp: 860,
+  xp: 1330,
   name: "あおい",
   locked: false,
   plan: defaultPlan(),
   answers: {},
-  history: [],
+  history: PAST_TRIPS,
   saved: [],
   liked: [],
   following: ["rin_film"],
@@ -109,7 +110,7 @@ const initial: State = {
   demoWalk: true,
 };
 
-const KEY = "meguroute:v2";
+const KEY = "meguroute:v3";
 
 function load(): State {
   try {
@@ -124,10 +125,14 @@ function load(): State {
 type Ctx = { s: State; set: (fn: (s: State) => State) => void; reset: () => void };
 const C = createContext<Ctx>(null!);
 
-export function StoreProvider({ children }: { children: ReactNode }) {
-  const [s, setS] = useState<State>(load);
+export function StoreProvider({ children, persist = true, seed }: { children: ReactNode; persist?: boolean; seed?: (s: State) => State }) {
+  const [s, setS] = useState<State>(() => {
+    const base = persist ? load() : initial;
+    return seed ? seed(base) : base;
+  });
 
   useEffect(() => {
+    if (!persist) return;
     try {
       localStorage.setItem(KEY, JSON.stringify(s));
     } catch {
@@ -139,7 +144,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         /* ignore */
       }
     }
-  }, [s]);
+  }, [s, persist]);
 
   useEffect(() => {
     const t = THEMES.find((x) => x.id === s.themeId) ?? THEMES[0];

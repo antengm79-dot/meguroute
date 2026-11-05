@@ -16,7 +16,10 @@ const FREE_PATH: LngLat[] = [
   ...(WALK_HINTS["b1>p1"] as LngLat[]).slice(1),
 ];
 
-const SPEEDS = [0, 30, 70, 140];
+// デモ歩行：動画（約20秒）に収まるよう、電車区間は約1.5秒・徒歩区間は約10秒で進む
+const SPEEDS = [0, 1, 2, 4];
+const WALK_SECONDS = 10;
+const TRAIN_SECONDS = 1.5;
 
 function Clock({ from }: { from: number }) {
   const [, tick] = useState(0);
@@ -52,7 +55,7 @@ export default function Trip() {
   }, [free, trip, full]);
 
   const [d, setD] = useState(trip?.progress ?? 0);
-  const [speed, setSpeed] = useState(2);
+  const [speed, setSpeed] = useState(1);
   const [ask, setAsk] = useState<string | null>(null);
   const [showTrace, setShowTrace] = useState(false);
   const [follow, setFollow] = useState(true);
@@ -68,7 +71,7 @@ export default function Trip() {
     const loop = (now: number) => {
       const dt = Math.min(0.1, (now - last) / 1000);
       last = now;
-      const v = dRef.current < trainLen ? 2500 : SPEEDS[speed];
+      const v = dRef.current < trainLen ? trainLen / TRAIN_SECONDS : (Math.max(40, (total - trainLen) / WALK_SECONDS)) * SPEEDS[speed];
       const nd = Math.min(total, dRef.current + v * dt);
       dRef.current = nd;
       setD(nd);
@@ -222,7 +225,7 @@ export default function Trip() {
             <p className="t-muted" style={{ margin: "0 0 18px" }}>写真を撮りますか？</p>
             <div className="col">
               <button className="btn block" onClick={() => { const n = ask; setAsk(null); nav(`/camera?spot=${encodeURIComponent(n)}`); }}><Icon name="camera" />撮影する</button>
-              <button className="btn soft block" onClick={() => setAsk(null)}>あとで</button>
+              <button className="btn soft block" onClick={() => setAsk(null)}>ここではとらない</button>
             </div>
           </div>
         </div>

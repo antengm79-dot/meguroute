@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Icon from "../components/Icon";
-import { Sheet, TabBar, Top } from "../components/ui";
+import { Sheet, Top } from "../components/ui";
 import { CATEGORIES, catOf } from "../data/categories";
 import { PLACES, SHOPS } from "../data/spots";
 import { uid, useStore, type Plan as PlanT, type Stop } from "../store";
@@ -160,7 +160,6 @@ export default function Plan() {
           <Icon name="search" />検索
         </button>
       </div>
-      <TabBar />
 
       {adding && (
         <Sheet onClose={() => setAdding(false)}>

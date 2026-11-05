@@ -13,16 +13,35 @@ import type { Shop } from "../data/spots";
 import { catOf } from "../data/categories";
 import type { TripSpot } from "../store";
 
-const STYLE_URL = "https://tiles.openfreemap.org/styles/liberty";
+// OpenStreetMap Japan（日本語ラベル）→ OpenFreeMap の順に試す
+const STYLE_URLS = [
+  "https://tile.openstreetmap.jp/styles/osm-bright-ja/style.json",
+  "https://tiles.openfreemap.org/styles/liberty",
+];
 
 let styleCache: Promise<StyleSpecification | null> | null = null;
 
+async function tryStyle(url: string): Promise<StyleSpecification | null> {
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 3500);
+    const r = await fetch(url, { signal: ctrl.signal });
+    clearTimeout(t);
+    return r.ok ? ((await r.json()) as StyleSpecification) : null;
+  } catch {
+    return null;
+  }
+}
+
 function fetchStyle(): Promise<StyleSpecification | null> {
   if (!styleCache) {
-    styleCache = Promise.race([
-      fetch(STYLE_URL).then((r) => (r.ok ? r.json() : null)).catch(() => null),
-      new Promise<null>((res) => setTimeout(() => res(null), 4000)),
-    ]).then((st) => (st ? restyle(st as StyleSpecification) : null));
+    styleCache = (async () => {
+      for (const u of STYLE_URLS) {
+        const st = await tryStyle(u);
+        if (st) return restyle(st);
+      }
+      return null;
+    })();
   }
   return styleCache;
 }

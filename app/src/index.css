@@ -54,7 +54,7 @@ input, select, textarea { font-family: inherit; color: inherit; font-size: 16px;
   .shell { height: min(900px, 100dvh - 32px); border-radius: 44px; box-shadow: 0 30px 80px rgba(8, 7, 143, 0.22), 0 0 0 10px #12133A; }
 }
 .screen { flex: 1; min-height: 0; overflow-y: auto; position: relative; }
-.screen-pad { padding: 16px 20px 120px; }
+.screen-pad { padding: 16px 20px 40px; }
 
 /* ---- header */
 .top {
@@ -114,17 +114,19 @@ input, select, textarea { font-family: inherit; color: inherit; font-size: 16px;
 }
 .chip.on { background: var(--base); color: #fff; border-color: var(--base); }
 
-/* ---- tab bar */
+/* ---- tab bar (normal bottom navigation, part of the layout) */
+.stage { flex: 1; min-height: 0; position: relative; display: flex; flex-direction: column; }
 .tabbar {
-  position: absolute; left: 12px; right: 12px; bottom: max(12px, env(safe-area-inset-bottom));
-  height: 66px; border-radius: 33px; background: var(--base); display: flex; align-items: center;
-  justify-content: space-around; z-index: 20; box-shadow: 0 10px 30px rgba(8, 7, 143, 0.3);
+  flex-shrink: 0; height: calc(66px + env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px);
+  background: #fff; border-top: 1px solid var(--line); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  position: relative; z-index: 20;
 }
 .tabbar a {
-  display: flex; flex-direction: column; align-items: center; gap: 2px; color: rgba(255,255,255,.6);
-  text-decoration: none; font-size: 10px; font-weight: 700; min-width: 60px; padding: 6px 0;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; color: var(--muted);
+  text-decoration: none; font-size: 10px; font-weight: 700; position: relative;
 }
-.tabbar a.active { color: var(--accent); }
+.tabbar a.active { color: var(--base); }
+.tabbar a.active::before { content: ""; position: absolute; top: 0; width: 28px; height: 4px; border-radius: 0 0 4px 4px; background: var(--accent); box-shadow: 0 0 0 1px var(--base) inset; }
 
 /* ---- bottom sheet */
 .sheet-backdrop { position: absolute; inset: 0; background: rgba(18, 19, 58, 0.25); z-index: 40; animation: fade .2s; }
@@ -221,3 +223,4 @@ input, select, textarea { font-family: inherit; color: inherit; font-size: 16px;
 .framed > .inner { border-radius: 19px; background: #fff; overflow: hidden; }
 .route-ov { position: absolute; inset: 0; pointer-events: none; }
 .route-svg { position: absolute; inset: 0; overflow: visible; }
+.sa-page { position: fixed; inset: 0; overflow: auto; background: #F4F5FB; }

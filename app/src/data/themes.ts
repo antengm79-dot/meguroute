@@ -43,5 +43,23 @@ export function levelColor(lv: number): string {
   return "#9AA3B5";
 }
 
-export const XP_PER_LEVEL = 100;
-export const levelOf = (xp: number) => Math.floor(xp / XP_PER_LEVEL) + 1;
+/**
+ * レベルの基準
+ * 写真とスポットを重視して、歩いた距離・スポット数・写真の枚数を合計する。
+ *   歩いた距離 1kmごとに 10XP / スポット1か所 30XP / 写真1枚 12XP
+ * 次のレベルに必要なXPはレベルが上がるほど増える（Lv.n → n+1 に 60 + 20n XP）。
+ */
+export const XP_RULE = { perKm: 10, perSpot: 30, perPhoto: 12 };
+export const tripXp = (meters: number, spots: number, photos: number) =>
+  Math.round((meters / 1000) * XP_RULE.perKm + spots * XP_RULE.perSpot + photos * XP_RULE.perPhoto);
+export const needFor = (lv: number) => 60 + 20 * lv;
+export function levelInfo(xp: number) {
+  let lv = 1;
+  let rest = xp;
+  while (rest >= needFor(lv)) {
+    rest -= needFor(lv);
+    lv++;
+  }
+  return { lv, cur: rest, need: needFor(lv), toNext: needFor(lv) - rest };
+}
+export const levelOf = (xp: number) => levelInfo(xp).lv;
