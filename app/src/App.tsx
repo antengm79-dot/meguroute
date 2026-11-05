@@ -1,4 +1,7 @@
-import { HashRouter, Route, Routes } from "react-router-dom";
+import { HashRouter, MemoryRouter, Route, Routes } from "react-router-dom";
+
+// claude.ai Artifact build keeps navigation in memory (the host owns the URL hash)
+const Router = import.meta.env.VITE_ARTIFACT ? MemoryRouter : HashRouter;
 import { StoreProvider } from "./store";
 import Home from "./screens/Home";
 import Plan from "./screens/Plan";
@@ -20,7 +23,7 @@ import Admin from "./screens/Admin";
 export default function App() {
   return (
     <StoreProvider>
-      <HashRouter>
+      <Router>
         <div className="shell">
           <Routes>
             <Route path="/" element={<Home />} />
@@ -41,7 +44,7 @@ export default function App() {
             <Route path="/admin" element={<Admin />} />
           </Routes>
         </div>
-      </HashRouter>
+      </Router>
     </StoreProvider>
   );
 }
