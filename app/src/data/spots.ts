@@ -1,4 +1,5 @@
 import type { LngLat } from "../lib/geo";
+import { OSAKA_PLACES, OSAKA_SHOPS } from "./osakaSpots";
 
 export type Photo = {
   id: string;
@@ -30,6 +31,9 @@ export type Shop = {
   tags: string[];
   photos: Photo[];
   featured?: Featured;
+  /** 実在のお店（osaka_spots.csv）の住所とエリア */
+  address?: string;
+  area?: string;
 };
 
 const ph = (id: string, n: number, hue: number, by: string[] = ["saki_osaka", "mio_walk", "yuu_sweets", "nana.trip"]): Photo[] =>
@@ -40,7 +44,7 @@ const ph = (id: string, n: number, hue: number, by: string[] = ["saki_osaka", "m
     by: by[i % by.length],
   }));
 
-export const SHOPS: Shop[] = [
+const DEMO_SHOPS: Shop[] = [
   // ---- 梅田・茶屋町
   {
     id: "c1", name: "喫茶ミナモ", cat: "cafe", pos: [135.4996, 34.7061],
@@ -113,6 +117,9 @@ export const SHOPS: Shop[] = [
   { id: "sea1", name: "天保山ハーバー", cat: "sea", pos: [135.4310, 34.6560], tags: ["海", "港", "夕日", "景色を見る"], photos: ph("sea1", 3, 200) },
 ];
 
+/** デモ用のお店（課金店舗の例を含む）＋ osaka_spots.csv の実在のお店 */
+export const SHOPS: Shop[] = [...DEMO_SHOPS, ...OSAKA_SHOPS];
+
 export const shopById = (id: string) => SHOPS.find((s) => s.id === id);
 
 export type Place = { name: string; pos: LngLat };
@@ -125,6 +132,7 @@ export const PLACES: Place[] = [
   { name: "淀屋橋駅", pos: [135.5013, 34.6926] },
   { name: "なんば駅", pos: [135.5010, 34.6660] },
   { name: "天王寺駅", pos: [135.5133, 34.6466] },
+  ...OSAKA_PLACES,
 ];
 
 /** 御堂筋線 なかもず → 梅田 (approx.) */

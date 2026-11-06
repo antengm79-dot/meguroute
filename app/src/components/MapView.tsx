@@ -134,6 +134,10 @@ export default function MapView(p: Props) {
           raf = requestAnimationFrame(() => setTick((x) => x + 1));
         });
         m.on("resize", () => setTick((x) => x + 1));
+        // 引いた表示ではお店の名前を隠して、ピンだけにする
+        const zoomClass = () => m.getContainer().classList.toggle("z-far", m.getZoom() < 15.3);
+        m.on("zoom", zoomClass);
+        zoomClass();
 
         // tappable store POIs from the base map
         const poiLayers = (m.getStyle().layers || []).filter((l: { id: string }) => /^poi/.test(l.id)).map((l: { id: string }) => l.id);

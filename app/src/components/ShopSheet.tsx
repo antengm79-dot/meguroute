@@ -81,6 +81,11 @@ export default function ShopSheet({
         <span className="tag">{f?.genre ?? catOf(shop.cat).label}</span>
       </div>
       <h2 className="h-ja" style={{ fontSize: 24 }}>{shop.name}</h2>
+      {shop.address && (
+        <div className="row t-small t-muted" style={{ gap: 6, marginTop: 6 }}>
+          <Icon name="pin" size={15} style={{ color: "var(--base)", flexShrink: 0 }} />{shop.address}
+        </div>
+      )}
 
       {f && (
         <>

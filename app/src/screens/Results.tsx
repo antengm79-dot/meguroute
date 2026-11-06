@@ -8,6 +8,7 @@ import { NEUTRAL } from "../data/questions";
 import { SHOPS, shopById, type Shop } from "../data/spots";
 import { buildRoute } from "../lib/routing";
 import { isVacant } from "../lib/crowd";
+import { dist, type LngLat } from "../lib/geo";
 import { uid, useStore, type TripSpot } from "../store";
 
 export default function Results() {
@@ -27,9 +28,12 @@ export default function Results() {
         ...Object.entries(s.answers).filter(([k, v]) => k.startsWith(st.cat + ":") && v && !NEUTRAL.has(v)).map(([, v]) => v),
         ...common,
       ];
-      const items = SHOPS.filter((x) => x.cat === st.cat)
-        .map((shop) => ({ shop, hit: want.filter((w) => shop.tags.includes(w)) }))
-        .sort((a, b) => b.hit.length + (isVacant(b.shop) ? 0.5 : 0) - (a.hit.length + (isVacant(a.shop) ? 0.5 : 0)));
+      // 出発地・到着地から3km以内のお店だけ（遠いほうは電車で移動する前提）
+      const near = (pos: LngLat) => Math.min(dist(pos, s.plan.start.pos), dist(pos, s.plan.end.pos));
+      const items = SHOPS.filter((x) => x.cat === st.cat && near(x.pos) < 3000)
+        .map((shop) => ({ shop, hit: want.filter((w) => shop.tags.includes(w)), d: near(shop.pos) }))
+        .sort((a, b) => b.hit.length + (isVacant(b.shop) ? 0.5 : 0) - (a.hit.length + (isVacant(a.shop) ? 0.5 : 0)) || a.d - b.d)
+        .slice(0, 10);
       return { st, items };
     });
   }, [s.answers, s.plan.stops]);
@@ -85,14 +89,14 @@ export default function Results() {
                     return (
                       <button key={shop.id} onClick={() => setDetail({ shop, stopId: st.id })}
                         style={{ width: 200, flexShrink: 0, textAlign: "left", padding: 0, borderRadius: 20, overflow: "hidden", background: "#fff", border: on ? "3px solid var(--base)" : isVacant(shop) ? "2px solid color-mix(in srgb, var(--base) 45%, transparent)" : "1px solid var(--line)" }}>
-                        <Photo p={shop.featured?.official[0] ?? shop.photos[0] ?? { hue: 220 }} h={120} r={0}>
+                        <Photo p={shop.featured?.official[0] ?? shop.photos[0] ?? { hue: ([...shop.id].reduce((a, c) => a + c.charCodeAt(0), 0) * 37) % 360 }} h={120} r={0}>
                           {isVacant(shop) && <span className="tag vacant" style={{ position: "absolute", left: 8, top: 8 }}>空き</span>}
                           {on && <span className="tag" style={{ position: "absolute", right: 8, top: 8, background: "var(--accent)" }}>ここにする</span>}
                         </Photo>
                         <div style={{ padding: "10px 12px 12px" }}>
                           <b style={{ display: "block", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{shop.name}</b>
                           <div className="t-small t-muted" style={{ marginTop: 2 }}>
-                            {shop.featured ? `${shop.featured.genre} ・ ${shop.featured.price}` : `みんなの写真 ${shop.photos.length}枚`}
+                            {shop.featured ? `${shop.featured.genre} ・ ${shop.featured.price}` : shop.address ? `${shop.area}エリア` : `みんなの写真 ${shop.photos.length}枚`}
                           </div>
                           <div className="row" style={{ gap: 4, flexWrap: "wrap", marginTop: 6, minHeight: 24 }}>
                             {hit.slice(0, 2).map((h) => <span key={h} className="tag" style={{ height: 22 }}>{h}</span>)}
