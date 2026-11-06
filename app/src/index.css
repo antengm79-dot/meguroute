@@ -197,6 +197,8 @@ input, select, textarea { font-family: inherit; color: inherit; font-size: 16px;
 .between { justify-content: space-between; }
 .grow { flex: 1; min-width: 0; }
 .tag { display: inline-flex; align-items: center; height: 24px; padding: 0 10px; border-radius: 12px; font-size: 11px; font-weight: 700; background: var(--soft); color: var(--base); }
+.tag.vacant { background: #1E9E5A; color: #fff; }
+.pin-sub { font-size: 10px; font-weight: 700; color: #fff; background: #1E9E5A; padding: 1px 7px; border-radius: 9px; white-space: nowrap; }
 .tag.pr { background: var(--base); color: var(--accent); font-family: var(--en); letter-spacing: .1em; }
 .tag.live { background: #FFE9EE; color: #D6204A; }
 .divider { height: 1px; background: var(--line); margin: 12px 0; }

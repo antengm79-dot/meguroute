@@ -9,6 +9,7 @@ import workerCode from "maplibre-gl/dist/maplibre-gl-worker.mjs?raw";
 // 地図のワーカーはページ内のコードから作る（.mjs の配信形式に左右されないように）
 maplibregl.setWorkerUrl(URL.createObjectURL(new Blob([workerCode], { type: "text/javascript" })));
 import { restyle } from "../lib/mapStyle";
+import { isVacant } from "../lib/crowd";
 import type { LngLat } from "../lib/geo";
 import { bounds } from "../lib/geo";
 import type { Shop } from "../data/spots";
@@ -172,16 +173,17 @@ export default function MapView(p: Props) {
       "shops",
       (p.shops ?? []).map((s) => {
         const d = document.createElement("button");
-        d.className = s.featured ? "pin pin-big" : "pin";
-        d.setAttribute("aria-label", s.name);
-        d.innerHTML = s.featured
-          ? `<span class="pin-head"><span class="pin-cat">${catOf(s.cat).label}</span></span><span class="pin-name">${s.name}</span>`
+        const big = isVacant(s); // 課金店舗は、いま空いているときだけ大きいピン
+        d.className = big ? "pin pin-big" : "pin";
+        d.setAttribute("aria-label", big ? `${s.name}（今空いてる）` : s.name);
+        d.innerHTML = big
+          ? `<span class="pin-head"><span class="pin-cat">空き</span></span><span class="pin-name">${s.name}</span><span class="pin-sub">${catOf(s.cat).label} ・ 今空いてる！</span>`
           : `<span class="pin-dot"></span><span class="pin-name">${s.name}</span>`;
         d.onclick = (e) => {
           e.stopPropagation();
           cb.current.onShop?.(s);
         };
-        return new maplibregl.Marker({ element: d, anchor: s.featured ? "bottom" : "left", offset: s.featured ? [0, 0] : [-6, 0] }).setLngLat(s.pos);
+        return new maplibregl.Marker({ element: d, anchor: big ? "bottom" : "left", offset: big ? [0, 0] : [-6, 0] }).setLngLat(s.pos);
       }),
     );
   }, [ready, p.shops]);

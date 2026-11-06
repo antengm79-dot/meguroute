@@ -7,6 +7,7 @@ import { catOf } from "../data/categories";
 import { NEUTRAL } from "../data/questions";
 import { SHOPS, shopById, type Shop } from "../data/spots";
 import { buildRoute } from "../lib/routing";
+import { isVacant } from "../lib/crowd";
 import { uid, useStore, type TripSpot } from "../store";
 
 export default function Results() {
@@ -28,7 +29,7 @@ export default function Results() {
       ];
       const items = SHOPS.filter((x) => x.cat === st.cat)
         .map((shop) => ({ shop, hit: want.filter((w) => shop.tags.includes(w)) }))
-        .sort((a, b) => b.hit.length + (b.shop.featured ? 0.5 : 0) - (a.hit.length + (a.shop.featured ? 0.5 : 0)));
+        .sort((a, b) => b.hit.length + (isVacant(b.shop) ? 0.5 : 0) - (a.hit.length + (isVacant(a.shop) ? 0.5 : 0)));
       return { st, items };
     });
   }, [s.answers, s.plan.stops]);
@@ -83,9 +84,9 @@ export default function Results() {
                     const on = pick === shop.id;
                     return (
                       <button key={shop.id} onClick={() => setDetail({ shop, stopId: st.id })}
-                        style={{ width: 200, flexShrink: 0, textAlign: "left", padding: 0, borderRadius: 20, overflow: "hidden", background: "#fff", border: on ? "3px solid var(--base)" : shop.featured ? "2px solid color-mix(in srgb, var(--base) 45%, transparent)" : "1px solid var(--line)" }}>
+                        style={{ width: 200, flexShrink: 0, textAlign: "left", padding: 0, borderRadius: 20, overflow: "hidden", background: "#fff", border: on ? "3px solid var(--base)" : isVacant(shop) ? "2px solid color-mix(in srgb, var(--base) 45%, transparent)" : "1px solid var(--line)" }}>
                         <Photo p={shop.featured?.official[0] ?? shop.photos[0] ?? { hue: 220 }} h={120} r={0}>
-                          {shop.featured && <span className="tag pr" style={{ position: "absolute", left: 8, top: 8 }}>PR</span>}
+                          {isVacant(shop) && <span className="tag vacant" style={{ position: "absolute", left: 8, top: 8 }}>空き</span>}
                           {on && <span className="tag" style={{ position: "absolute", right: 8, top: 8, background: "var(--accent)" }}>ここにする</span>}
                         </Photo>
                         <div style={{ padding: "10px 12px 12px" }}>

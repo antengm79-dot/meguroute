@@ -2,31 +2,27 @@ import { useEffect, useState } from "react";
 import type { Shop } from "../data/spots";
 import { catOf } from "../data/categories";
 import { useStore } from "../store";
+import { crowdNow, isVacant } from "../lib/crowd";
 import Icon from "./Icon";
 import { Photo, Sheet } from "./ui";
 
-/** simulated live occupancy from the store's ESP32 sensor */
+/** live occupancy (updates every 3 seconds) */
 export function useCrowd(seed: string) {
-  const base = (seed.charCodeAt(0) * 7 + seed.length * 13) % 20;
-  const [n, setN] = useState(base + 6);
+  const [now, setNow] = useState(Date.now());
   useEffect(() => {
-    const t = setInterval(() => setN((x) => Math.max(2, Math.min(30, x + Math.round(Math.random() * 4 - 2)))), 3000);
+    const t = setInterval(() => setNow(Date.now()), 3000);
     return () => clearInterval(t);
   }, []);
-  const cap = 30;
-  const ratio = n / cap;
-  const label = ratio < 0.4 ? "空いています" : ratio < 0.75 ? "やや混雑" : "混雑";
-  const color = ratio < 0.4 ? "#1E9E5A" : ratio < 0.75 ? "#E8A300" : "#D6204A";
-  return { n, cap, ratio, label, color };
+  return crowdNow(seed, now);
 }
 
-function Crowd({ id }: { id: string }) {
+function Crowd({ id, sensor }: { id: string; sensor: boolean }) {
   const c = useCrowd(id);
   return (
     <div className="card" style={{ padding: 14 }}>
       <div className="row between">
         <span className="row" style={{ gap: 6, fontWeight: 700, fontSize: 14 }}>
-          <Icon name="sensor" size={18} style={{ color: "var(--base)" }} />混雑状況
+          <Icon name="sensor" size={18} style={{ color: "var(--base)" }} />今空いてる！
         </span>
         <span className="tag live">● LIVE</span>
       </div>
@@ -39,7 +35,7 @@ function Crowd({ id }: { id: string }) {
           </div>
         </div>
       </div>
-      <div className="t-small t-muted" style={{ marginTop: 8 }}>店内 {c.n}人 / {c.cap}席 ・ 混雑センサー設置店</div>
+      <div className="t-small t-muted" style={{ marginTop: 8 }}>{sensor ? `店内 ${c.n}人 / ${c.cap}席 ・ 混雑センサーで計測` : "みんなの蓄積データからの予測"}</div>
     </div>
   );
 }
@@ -75,12 +71,13 @@ export default function ShopSheet({
   }
   if (!shop) return null;
   const f = shop.featured;
+  const vacant = isVacant(shop);
   const rec = s.recommended[shop.id] ?? [];
   const photos = [...shop.photos].sort((a, b) => (rec.includes(b.id) ? 1 : 0) - (rec.includes(a.id) ? 1 : 0));
   return (
     <Sheet onClose={onClose}>
       <div className="row" style={{ gap: 6, marginBottom: 6 }}>
-        {f && <span className="tag pr">PR</span>}
+        {vacant && <span className="tag vacant">今空いてる！</span>}
         <span className="tag">{f?.genre ?? catOf(shop.cat).label}</span>
       </div>
       <h2 className="h-ja" style={{ fontSize: 24 }}>{shop.name}</h2>
@@ -100,7 +97,7 @@ export default function ShopSheet({
             <div className="row"><Icon name="clock" size={18} style={{ color: "var(--base)" }} /><b style={{ width: 64 }}>営業時間</b>{f.hours}（定休 {f.holiday}）</div>
             <div className="row"><Icon name="cafe" size={18} style={{ color: "var(--base)" }} /><b style={{ width: 64 }}>メニュー</b><span className="grow">{f.menu}</span></div>
           </div>
-          {f.sensor && <div style={{ marginTop: 14 }}><Crowd id={shop.id} /></div>}
+          {vacant && <div style={{ marginTop: 14 }}><Crowd id={shop.id} sensor={!!f.sensor} /></div>}
         </>
       )}
 
