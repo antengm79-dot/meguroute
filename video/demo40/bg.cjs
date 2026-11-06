@@ -8,7 +8,7 @@ const LOGO = 'data:image/png;base64,' + fs.readFileSync(process.argv[3]).toStrin
 const PILLARS = [['計画', 'PLAN'], ['記録', 'RECORD'], ['共有', 'SHARE']];
 const STEPS = [
   [0, '「ルートを決めてから出かける」\nを押す'],
-  [0, '出発地・到着地と、\n行きたい場所を入れる'],
+  [0, '出発地・到着地を入れて、\n経由地はカテゴリや場所の名前で追加'],
   [0, '質問に答えると、\n条件に合うお店が表示'],
   [0, 'AIがルートを作成'],
   [1, '「旅をスタート」で、\n歩いた道が色づく'],
