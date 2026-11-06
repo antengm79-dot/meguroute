@@ -111,8 +111,9 @@ export default function Results() {
           );
         })}
       </div>
-      <div className="float" style={{ left: 16, right: 16, bottom: 20 }}>
-        <button className="btn block glow" style={{ height: 60, fontSize: 17 }} disabled={!ready || busy} onClick={decide}>
+      <div className="bottom-bar">
+        <button className={"btn block" + (ready ? " glow" : "")} style={{ height: 60, fontSize: 17 }} disabled={!ready || busy} onClick={decide}>
+          {ready && !busy && <Icon name="sparkle" />}
           {busy ? "ルートを作成中…" : ready ? "決定してルートを作る" : `あと${s.plan.stops.filter((st) => !chosen[st.id]).length}か所えらんでね`}
         </button>
       </div>

@@ -39,7 +39,7 @@ export default function TripEnd() {
   // draw the route in ~3s
   useEffect(() => {
     if (!trip) return;
-    const t0 = performance.now() + 700;
+    const t0 = performance.now() + 200;
     let raf = 0;
     let done: ReturnType<typeof setTimeout> | undefined;
     const step = (now: number) => {

@@ -29,6 +29,7 @@ function PlaceInput({ value, onPick, placeholder }: { value: string; onPick: (na
         className="pill-input"
         value={q}
         placeholder={placeholder}
+        autoComplete="off"
         onFocus={() => setOpen(true)}
         onBlur={() => setTimeout(() => setOpen(false), 150)}
         onChange={(e) => setQ(e.target.value)}
@@ -166,7 +167,7 @@ export default function Plan() {
           <h2 className="h-ja" style={{ fontSize: 20, marginBottom: 12 }}>経由地を追加</h2>
           <div className="row" style={{ background: "var(--soft)", borderRadius: 26, padding: "0 16px" }}>
             <Icon name="search" size={20} style={{ color: "var(--muted)" }} />
-            <input className="pill-input" style={{ background: "none", paddingLeft: 8 }} placeholder="場所やお店の名前で検索" value={q} onChange={(e) => setQ(e.target.value)} autoFocus />
+            <input className="pill-input" style={{ background: "none", paddingLeft: 8 }} placeholder="場所やお店の名前で検索" value={q} onChange={(e) => setQ(e.target.value)} autoComplete="off" enterKeyHint="search" />
           </div>
           {hits.length > 0 && (
             <div className="col" style={{ gap: 4, marginTop: 8 }}>

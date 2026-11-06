@@ -86,7 +86,13 @@ input, select, textarea { font-family: inherit; color: inherit; font-size: 16px;
 .btn.soft { background: var(--soft); color: var(--base); }
 .btn.block { width: 100%; }
 .btn.sm { height: 40px; padding: 0 16px; font-size: 14px; border-radius: 20px; }
-.btn:disabled { opacity: .4; }
+.btn:disabled { background: #E4E6F3; color: var(--muted); box-shadow: none; cursor: default; }
+/* 画面の一番下に固定するボタンの帯（スクロールする画面の最後に置く） */
+.bottom-bar {
+  position: sticky; bottom: 0; z-index: 15; margin-top: 8px;
+  padding: 14px 16px max(16px, env(safe-area-inset-bottom));
+  background: linear-gradient(to bottom, rgba(255,255,255,0), #fff 28%);
+}
 .glow { box-shadow: 0 8px 28px color-mix(in srgb, var(--accent) 70%, transparent); }
 
 /* ---- cards & forms */

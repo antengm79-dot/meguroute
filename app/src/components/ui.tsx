@@ -1,4 +1,5 @@
-import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { NavLink, useNavigate } from "react-router-dom";
 import Icon from "./Icon";
 import type { Photo as PhotoT } from "../data/spots";
@@ -85,15 +86,33 @@ export function LvBadge({ lv }: { lv: number }) {
   return <span className="lv" style={{ background: levelColor(lv) }}>LV.{lv}</span>;
 }
 
-export function Sheet({ onClose, children }: { onClose: () => void; children: ReactNode }) {
+/**
+ * スクロールしない画面の枠（.stage）に重ねて描く。
+ * スクロールする画面の中に absolute で置くと、スクロールに合わせてずれてしまうため。
+ */
+export function StageLayer({ children }: { children: ReactNode }) {
+  const anchor = useRef<HTMLSpanElement>(null);
+  const [host, setHost] = useState<HTMLElement | null>(null);
+  useLayoutEffect(() => {
+    setHost((anchor.current?.closest(".stage") as HTMLElement | null) ?? document.body);
+  }, []);
   return (
     <>
+      <span ref={anchor} hidden />
+      {host && createPortal(children, host)}
+    </>
+  );
+}
+
+export function Sheet({ onClose, children }: { onClose: () => void; children: ReactNode }) {
+  return (
+    <StageLayer>
       <div className="sheet-backdrop" onClick={onClose} />
       <div className="sheet" role="dialog">
         <div className="grab" />
         {children}
       </div>
-    </>
+    </StageLayer>
   );
 }
 
@@ -123,5 +142,5 @@ export function useToast(): [ReactNode, (m: string) => void] {
     const t = setTimeout(() => setMsg(null), 1800);
     return () => clearTimeout(t);
   }, [msg]);
-  return [msg ? <div className="toast">{msg}</div> : null, setMsg];
+  return [msg ? <StageLayer><div className="toast">{msg}</div></StageLayer> : null, setMsg];
 }
