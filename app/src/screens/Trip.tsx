@@ -60,8 +60,11 @@ export default function Trip() {
   const [showTrace, setShowTrace] = useState(false);
   const [follow, setFollow] = useState(true);
   const dRef = useRef(d);
+  const leavingRef = useRef(false);
   dRef.current = d;
   const visitedRef = useRef<string[]>(trip?.visited ?? []);
+  const stopsRef = useRef(stops);
+  stopsRef.current = stops;
 
   // demo walking
   useEffect(() => {
@@ -72,10 +75,14 @@ export default function Trip() {
       const dt = Math.min(0.1, (now - last) / 1000);
       last = now;
       const v = dRef.current < trainLen ? trainLen / TRAIN_SECONDS : (Math.max(60, (total - trainLen) / WALK_SECONDS)) * SPEEDS[speed];
-      const nd = Math.min(total, dRef.current + v * dt);
+      if (leavingRef.current) return; // 画面を切り替えている間は止める
+      let nd = Math.min(total, dRef.current + v * dt);
+      // 次のスポットを飛び越さず、その地点でぴたっと止まる
+      const nextStop = stopsRef.current.find((x) => !visitedRef.current.includes(x.name));
+      if (nextStop && dRef.current <= nextStop.at && nd >= nextStop.at) nd = nextStop.at;
       dRef.current = nd;
       setD(nd);
-      if (nd < total) raf = requestAnimationFrame(loop);
+      if (nd < total && !(nextStop && nd === nextStop.at)) raf = requestAnimationFrame(loop);
     };
     raf = requestAnimationFrame(loop);
     return () => cancelAnimationFrame(raf);
@@ -97,20 +104,28 @@ export default function Trip() {
   useEffect(() => {
     const next = stops.find((x) => !visitedRef.current.includes(x.name));
     if (!next || ask) return;
-    if (Math.abs(d - next.at) < 12 || dist(me.pos, next.pos) < 25) {
+    if (d >= next.at - 12 || dist(me.pos, next.pos) < 25) {
       visitedRef.current = [...visitedRef.current, next.name];
       setAsk(next.name);
     }
   }, [d, stops, ask, me.pos]);
 
-  // persist progress
+  // 歩いた位置を保存する（撮影から戻っても続きから再開できるように）
+  const save = () =>
+    set((x) => (x.trip ? { ...x, trip: { ...x.trip, progress: dRef.current, walked: dRef.current > trainLen ? sliceTo(walkPath, dRef.current - trainLen) : [], visited: visitedRef.current } } : x));
+  const saveRef = useRef(save);
+  saveRef.current = save;
   useEffect(() => {
-    const t = setTimeout(() => {
-      set((x) => (x.trip ? { ...x, trip: { ...x.trip, progress: dRef.current, walked: d > trainLen ? sliceTo(walkPath, d - trainLen) : [], visited: visitedRef.current } } : x));
-    }, 400);
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [Math.round(d / 20), ask]);
+    const t = setInterval(() => saveRef.current(), 600);
+    return () => { clearInterval(t); saveRef.current(); };
+  }, []);
+
+  /** 歩くのを止めて位置を保存してから、カメラ画面へ（連続した更新で画面切り替えが遅れないように） */
+  const goCamera = (spot: string) => {
+    leavingRef.current = true;
+    save();
+    nav(`/camera?spot=${encodeURIComponent(spot)}`);
+  };
 
   if (!trip) return <Navigate to="/" replace />;
 
@@ -140,6 +155,7 @@ export default function Trip() {
   const pins: PhotoPin[] = trip.photos.map((p) => ({ pos: p.pos, label: p.spot, img: p.dataUrl, hue: p.hue }));
 
   const end = () => {
+    leavingRef.current = true;
     set((x) => (x.trip ? { ...x, trip: { ...x.trip, walked: walked.length > 1 ? walked : x.trip.walked, endedAt: Date.now(), visited: visitedRef.current } } : x));
     nav("/trip/end");
   };
@@ -204,7 +220,7 @@ export default function Trip() {
           </div>
         </div>
         <div className="row" style={{ gap: 10 }}>
-          <button className="btn grow" onClick={() => nav(`/camera?spot=${encodeURIComponent(next && dist(me.pos, next.pos) < 60 ? next.name : visitedRef.current[visitedRef.current.length - 1] ?? "おさんぽ")}`)}>
+          <button className="btn grow" onClick={() => goCamera(next && dist(me.pos, next.pos) < 60 ? next.name : visitedRef.current[visitedRef.current.length - 1] ?? "おさんぽ")}>
             <Icon name="camera" />撮影する
           </button>
           <button className="btn ghost" onClick={end}><Icon name="flag" size={18} />旅を終了</button>
@@ -219,7 +235,7 @@ export default function Trip() {
             <h2 className="h-ja" style={{ fontSize: 22, margin: "6px 0 4px" }}>{ask}に<br />着きました！</h2>
             <p className="t-muted" style={{ margin: "0 0 18px" }}>写真を撮りますか？</p>
             <div className="col">
-              <button className="btn block" onClick={() => { const n = ask; setAsk(null); nav(`/camera?spot=${encodeURIComponent(n)}`); }}><Icon name="camera" />撮影する</button>
+              <button className="btn block" onClick={() => goCamera(ask)}><Icon name="camera" />撮影する</button>
               <button className="btn soft block" onClick={() => setAsk(null)}>ここではとらない</button>
             </div>
           </div>
