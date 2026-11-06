@@ -59,4 +59,8 @@ export const OSAKA_SHOPS: Shop[] = ROWS.filter((r) => !isPlace(r)).map((r) => ({
 }));
 
 /** キャンパスや駅（出発地・到着地の候補） */
-export const OSAKA_PLACES: Place[] = ROWS.filter(isPlace).map((r) => ({ name: r.name, pos: [r.lng, r.lat] as LngLat }));
+const KANA: Record<string, string> = {
+  杉本キャンパス: "すぎもときゃんぱす", 中百舌鳥キャンパス: "なかもずきゃんぱす", 森之宮キャンパス: "もりのみやきゃんぱす",
+  JR天王寺駅: "てんのうじえき", JR大阪駅: "おおさかえき", "なんば駅（御堂筋線）": "なんばえき",
+};
+export const OSAKA_PLACES: Place[] = ROWS.filter(isPlace).map((r) => ({ name: r.name, kana: KANA[r.name], pos: [r.lng, r.lat] as LngLat }));

@@ -21,8 +21,9 @@ const fmtDate = (d: string) => {
 function PlaceInput({ value, onPick, placeholder }: { value: string; onPick: (name: string, pos: [number, number]) => void; placeholder: string }) {
   const [q, setQ] = useState(value);
   const [open, setOpen] = useState(false);
-  const all = [...PLACES, ...SHOPS.map((s) => ({ name: s.name, pos: s.pos }))];
-  const hits = q && q !== value ? all.filter((p) => p.name.includes(q)).slice(0, 5) : []; // 文字を打ったときだけ候補を出す
+  const all: { name: string; pos: [number, number]; kana?: string }[] = [...PLACES, ...SHOPS.map((s) => ({ name: s.name, pos: s.pos }))];
+  // 文字を打ったときだけ候補を出す（駅名などはひらがなの読みでも見つかる）
+  const hits = q && q !== value ? all.filter((p) => p.name.includes(q) || p.kana?.startsWith(q)).slice(0, 5) : [];
   return (
     <div style={{ position: "relative", flex: 1 }}>
       <input

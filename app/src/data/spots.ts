@@ -122,16 +122,16 @@ export const SHOPS: Shop[] = [...DEMO_SHOPS, ...OSAKA_SHOPS];
 
 export const shopById = (id: string) => SHOPS.find((s) => s.id === id);
 
-export type Place = { name: string; pos: LngLat };
+export type Place = { name: string; pos: LngLat; kana?: string };
 
 export const PLACES: Place[] = [
-  { name: "中百舌鳥駅", pos: [135.5030, 34.5562] },
-  { name: "梅田駅", pos: [135.4959, 34.7025] },
-  { name: "中崎町駅", pos: [135.5050, 34.7070] },
-  { name: "北浜駅", pos: [135.5068, 34.6915] },
-  { name: "淀屋橋駅", pos: [135.5013, 34.6926] },
-  { name: "なんば駅", pos: [135.5010, 34.6660] },
-  { name: "天王寺駅", pos: [135.5133, 34.6466] },
+  { name: "中百舌鳥駅", kana: "なかもずえき", pos: [135.5030, 34.5562] },
+  { name: "梅田駅", kana: "うめだえき", pos: [135.4959, 34.7025] },
+  { name: "中崎町駅", kana: "なかざきちょうえき", pos: [135.5050, 34.7070] },
+  { name: "北浜駅", kana: "きたはまえき", pos: [135.5068, 34.6915] },
+  { name: "淀屋橋駅", kana: "よどやばしえき", pos: [135.5013, 34.6926] },
+  { name: "なんば駅", kana: "なんばえき", pos: [135.5010, 34.6660] },
+  { name: "天王寺駅", kana: "てんのうじえき", pos: [135.5133, 34.6466] },
   ...OSAKA_PLACES,
 ];
 
