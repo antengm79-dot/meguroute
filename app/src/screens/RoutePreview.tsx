@@ -63,7 +63,7 @@ export default function RoutePreview() {
               <div className="grow" style={{ paddingBottom: 16 }}>
                 <b>{sp.name}</b>
                 <div className="t-small t-muted">
-                  {sp.cat ? `${catOf(sp.cat).label} ・ ${sp.stay}分` : i === 0 ? "出発" : i === tl.length - 1 ? "到着" : tl[i].train ? "御堂筋線で移動" : ""}
+                  {sp.cat ? `${catOf(sp.cat).label} ・ ${sp.stay}分` : i === 0 ? "出発" : i === tl.length - 1 ? "到着" : tl[i].train ? "電車で移動" : ""}
                 </div>
               </div>
             </div>

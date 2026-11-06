@@ -28,9 +28,10 @@ export default function Results() {
         ...Object.entries(s.answers).filter(([k, v]) => k.startsWith(st.cat + ":") && v && !NEUTRAL.has(v)).map(([, v]) => v),
         ...common,
       ];
-      // 出発地・到着地から3km以内のお店だけ（遠いほうは電車で移動する前提）
-      const near = (pos: LngLat) => Math.min(dist(pos, s.plan.start.pos), dist(pos, s.plan.end.pos));
-      const items = SHOPS.filter((x) => x.cat === st.cat && near(x.pos) < 3000)
+      // エリアを選んだときはその中心から2km、選ばないときは出発地・到着地から3km以内のお店だけ
+      const anchors: LngLat[] = [...(s.plan.areaPos ? [s.plan.areaPos] : [s.plan.start.pos]), ...(s.plan.end.name ? [s.plan.end.pos] : []), ...s.plan.stops.filter((x) => x.pos).map((x) => x.pos!)];
+      const near = (pos: LngLat) => Math.min(...anchors.map((a) => dist(pos, a)));
+      const items = SHOPS.filter((x) => x.cat === st.cat && near(x.pos) < (s.plan.areaPos ? 2000 : 3000))
         .map((shop) => ({ shop, hit: want.filter((w) => shop.tags.includes(w)), d: near(shop.pos) }))
         .sort((a, b) => b.hit.length + (isVacant(b.shop) ? 0.5 : 0) - (a.hit.length + (isVacant(a.shop) ? 0.5 : 0)) || a.d - b.d)
         .slice(0, 10);
@@ -43,12 +44,12 @@ export default function Results() {
   const decide = async () => {
     setBusy(true);
     const spots: TripSpot[] = [
-      { name: s.plan.start.name, pos: s.plan.start.pos, time: s.plan.start.time },
+      { name: s.plan.start.name || "現在地", pos: s.plan.start.pos, time: s.plan.start.time },
       ...s.plan.stops.map((st) => {
         const sh = shopById(chosen[st.id])!;
         return { name: sh.name, pos: sh.pos, shopId: sh.id, cat: sh.cat };
       }),
-      { name: s.plan.end.name, pos: s.plan.end.pos, time: s.plan.end.time },
+      ...(s.plan.end.name ? [{ name: s.plan.end.name, pos: s.plan.end.pos, time: s.plan.end.time }] : []),
     ];
     const r = await buildRoute(spots);
     const first = spots[1]?.name ?? "";

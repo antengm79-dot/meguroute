@@ -19,6 +19,7 @@ export type Plan = {
   date: string;
   mode: "walk" | "train" | "bike" | "car";
   area: string;
+  areaPos?: LngLat; // 選んだエリアの中心（お店一覧の絞り込みに使う）
   start: { name: string; pos: LngLat; time: string };
   end: { name: string; pos: LngLat; time: string };
   stops: Stop[];
@@ -78,12 +79,16 @@ const today = () => {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 };
 
+/** 現在地（デモでは梅田駅） */
+export const HERE: LngLat = [135.4959, 34.7025];
+
 export const defaultPlan = (): Plan => ({
   date: today(),
   mode: "walk",
-  area: "大阪・梅田〜中之島",
-  start: { name: "中百舌鳥駅", pos: [135.503, 34.5562], time: "10:00" },
-  end: { name: "北浜駅", pos: [135.5068, 34.6915], time: "18:00" },
+  // 最初は空欄。出発地が空なら現在地から、到着地が空なら最後の経由地で終わる
+  area: "",
+  start: { name: "", pos: HERE, time: "10:00" },
+  end: { name: "", pos: HERE, time: "18:00" },
   stops: [], // 経由地は、ユーザーが選んだものだけを入れる
 });
 

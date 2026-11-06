@@ -5,7 +5,7 @@ import ShopSheet from "../components/ShopSheet";
 import Icon from "../components/Icon";
 import { Logo } from "../components/ui";
 import { SHOPS, type Shop } from "../data/spots";
-import { theme, uid, useStore } from "../store";
+import { defaultPlan, theme, uid, useStore } from "../store";
 import { useGeo } from "../lib/useGeo";
 import type { LngLat } from "../lib/geo";
 
@@ -66,7 +66,7 @@ export default function Home() {
           <button className="btn accent block glow" style={{ height: 60, fontSize: 17 }} onClick={startFree}>
             <Icon name="playtri" fill="currentColor" size={18} />旅をスタート
           </button>
-          <button className="btn block" onClick={() => { set((x) => ({ ...x, plan: { ...x.plan, stops: [] }, answers: {} })); nav("/plan"); }}>
+          <button className="btn block" onClick={() => { set((x) => ({ ...x, plan: { ...defaultPlan(), date: x.plan.date, mode: x.plan.mode }, answers: {} })); nav("/plan"); }}>
             <Icon name="sparkle" />ルートを決めてから出かける
           </button>
         </div>

@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import Icon from "../components/Icon";
 import { Sheet, Top } from "../components/ui";
 import { CATEGORIES, catOf } from "../data/categories";
-import { PLACES, SHOPS } from "../data/spots";
+import { AREAS, PLACES, SHOPS } from "../data/spots";
 import { uid, useStore, type Plan as PlanT, type Stop } from "../store";
 
 const MODES: { k: PlanT["mode"]; icon: string; label: string }[] = [
@@ -22,7 +22,7 @@ function PlaceInput({ value, onPick, placeholder }: { value: string; onPick: (na
   const [q, setQ] = useState(value);
   const [open, setOpen] = useState(false);
   const all = [...PLACES, ...SHOPS.map((s) => ({ name: s.name, pos: s.pos }))];
-  const hits = q ? all.filter((p) => p.name.includes(q)).slice(0, 5) : PLACES.slice(0, 5);
+  const hits = q && q !== value ? all.filter((p) => p.name.includes(q)).slice(0, 5) : []; // 文字を打ったときだけ候補を出す
   return (
     <div style={{ position: "relative", flex: 1 }}>
       <input
@@ -53,6 +53,7 @@ export default function Plan() {
   const nav = useNavigate();
   const p = s.plan;
   const [adding, setAdding] = useState(false);
+  const [areaOpen, setAreaOpen] = useState(false);
   const [q, setQ] = useState("");
   const [drag, setDrag] = useState<number | null>(null);
 
@@ -101,7 +102,20 @@ export default function Plan() {
           </div>
           <div>
             <div className="field-label"><Icon name="pin" size={18} />行きたい場所・エリア</div>
-            <input className="pill-input" value={p.area} onChange={(e) => upd((pl) => ({ ...pl, area: e.target.value }))} />
+            <button className="pill-input row between" style={{ border: "none", textAlign: "left", cursor: "pointer" }} onClick={() => setAreaOpen(!areaOpen)} aria-expanded={areaOpen}>
+              <span style={{ color: p.area ? "var(--ink)" : "var(--muted)", fontWeight: p.area ? 700 : 400 }}>{p.area || "エリアをえらぶ"}</span>
+              <Icon name={areaOpen ? "up" : "down"} size={18} style={{ color: "var(--base)" }} />
+            </button>
+            {areaOpen && (
+              <div className="row" style={{ flexWrap: "wrap", gap: 8, marginTop: 10 }}>
+                {AREAS.map((a) => (
+                  <button key={a.name} className={"chip" + (p.area === a.name ? " on" : "")}
+                    onClick={() => { upd((pl) => ({ ...pl, area: a.name, areaPos: a.pos })); setAreaOpen(false); }}>
+                    {a.name}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -112,7 +126,7 @@ export default function Plan() {
           <div>
             <div className="field-label"><Icon name="playtri" size={16} fill="var(--base)" />旅の出発地</div>
             <div className="row">
-              <PlaceInput value={p.start.name} placeholder="出発地" onPick={(name, pos) => upd((pl) => ({ ...pl, start: { ...pl.start, name, pos } }))} />
+              <PlaceInput value={p.start.name} placeholder="現在地から出発" onPick={(name, pos) => upd((pl) => ({ ...pl, start: { ...pl.start, name, pos } }))} />
               <input type="time" className="pill-input" style={{ width: 110, textAlign: "center" }} value={p.start.time} onChange={(e) => upd((pl) => ({ ...pl, start: { ...pl.start, time: e.target.value } }))} />
             </div>
           </div>
@@ -154,7 +168,7 @@ export default function Plan() {
           <div>
             <div className="field-label"><Icon name="flag" size={18} />旅の到着地</div>
             <div className="row">
-              <PlaceInput value={p.end.name} placeholder="到着地" onPick={(name, pos) => upd((pl) => ({ ...pl, end: { ...pl.end, name, pos } }))} />
+              <PlaceInput value={p.end.name} placeholder="最後のスポットで終了" onPick={(name, pos) => upd((pl) => ({ ...pl, end: { ...pl.end, name, pos } }))} />
               <input type="time" className="pill-input" style={{ width: 110, textAlign: "center" }} value={p.end.time} onChange={(e) => upd((pl) => ({ ...pl, end: { ...pl.end, time: e.target.value } }))} />
             </div>
           </div>

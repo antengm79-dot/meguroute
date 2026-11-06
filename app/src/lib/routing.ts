@@ -30,10 +30,16 @@ export async function buildRoute(spots: TripSpot[]): Promise<{ walk: LngLat[]; t
   let list = [...spots];
   let train: LngLat[] | undefined;
   if (list.length >= 2 && dist(list[0].pos, list[1].pos) > 3000) {
-    // 電車移動：中百舌鳥 → 梅田
-    train = MIDOSUJI as LngLat[];
-    const umeda: TripSpot = { name: "梅田駅", pos: train[train.length - 1] };
-    list = [list[0], umeda, ...list.slice(1)];
+    const line = MIDOSUJI as LngLat[];
+    const umeda = line[line.length - 1];
+    if (dist(list[0].pos, line[0]) < 2000 && dist(list[1].pos, umeda) < 2500) {
+      // 中百舌鳥 → 梅田 は御堂筋線
+      train = line;
+      list = [list[0], { name: "梅田駅", pos: umeda }, ...list.slice(1)];
+    } else {
+      // それ以外は、出発地から最初のスポットまでを電車の区間として点線で結ぶ
+      train = [list[0].pos, list[1].pos];
+    }
   }
   const walkStart = train ? 1 : 0;
   const walk: LngLat[] = [];
