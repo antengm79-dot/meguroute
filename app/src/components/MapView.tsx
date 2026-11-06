@@ -4,28 +4,44 @@ import * as maplibregl from "maplibre-gl";
 type StyleSpecification = maplibregl.StyleSpecification;
 type MLMap = maplibregl.Map;
 import "maplibre-gl/dist/maplibre-gl.css";
-import workerUrl from "maplibre-gl/dist/maplibre-gl-worker.mjs?url";
+import workerCode from "maplibre-gl/dist/maplibre-gl-worker.mjs?raw";
 
-maplibregl.setWorkerUrl(workerUrl);
+// 地図のワーカーはページ内のコードから作る（.mjs の配信形式に左右されないように）
+maplibregl.setWorkerUrl(URL.createObjectURL(new Blob([workerCode], { type: "text/javascript" })));
 import type { LngLat } from "../lib/geo";
 import { bounds } from "../lib/geo";
 import type { Shop } from "../data/spots";
 import { catOf } from "../data/categories";
 import type { TripSpot } from "../store";
 
-// OpenStreetMap Japan（日本語ラベル）→ OpenFreeMap の順に試す
+// OpenFreeMap（OpenStreetMapのデータ）→ OpenStreetMap Japan の順に試し、
+// どちらも読めないときは OpenStreetMap Japan の画像タイルで表示する
 const STYLE_URLS = [
-  "https://tile.openstreetmap.jp/styles/osm-bright-ja/style.json",
   "https://tiles.openfreemap.org/styles/liberty",
+  "https://tile.openstreetmap.jp/styles/osm-bright-ja/style.json",
 ];
+
+const RASTER: StyleSpecification = {
+  version: 8,
+  sources: {
+    osm: {
+      type: "raster",
+      tiles: ["https://tile.openstreetmap.jp/{z}/{x}/{y}.png"],
+      tileSize: 256,
+      maxzoom: 18,
+      attribution: "© OpenStreetMap contributors",
+    },
+  },
+  layers: [{ id: "osm", type: "raster", source: "osm", paint: { "raster-saturation": -0.35, "raster-contrast": -0.05 } }],
+};
 
 let styleCache: Promise<StyleSpecification | null> | null = null;
 
 async function tryStyle(url: string): Promise<StyleSpecification | null> {
   try {
     const ctrl = new AbortController();
-    const t = setTimeout(() => ctrl.abort(), 3500);
-    const r = await fetch(url, { signal: ctrl.signal });
+    const t = setTimeout(() => ctrl.abort(), 8000);
+    const r = await fetch(url, { signal: ctrl.signal, mode: "cors" });
     clearTimeout(t);
     return r.ok ? ((await r.json()) as StyleSpecification) : null;
   } catch {
@@ -40,8 +56,11 @@ function fetchStyle(): Promise<StyleSpecification | null> {
         const st = await tryStyle(u);
         if (st) return restyle(st);
       }
-      return null;
-    })();
+      return null; // → RASTER
+    })().then((st) => {
+      if (!st) styleCache = null; // 次に地図を開いたときにもう一度試す
+      return st;
+    });
   }
   return styleCache;
 }
@@ -83,11 +102,6 @@ function restyle(st: StyleSpecification): StyleSpecification {
   return st;
 }
 
-const FALLBACK: StyleSpecification = {
-  version: 8,
-  sources: {},
-  layers: [{ id: "bg", type: "background", paint: { "background-color": "rgba(0,0,0,0)" } }],
-};
 
 export type PhotoPin = { pos: LngLat; label: string; img?: string; hue: number };
 
@@ -135,7 +149,7 @@ export default function MapView(p: Props) {
       if (!st) setOffline(true);
       const m = new maplibregl.Map({
         container: el.current,
-        style: st ?? FALLBACK,
+        style: st ?? RASTER,
         center: p.center ?? [135.502, 34.704],
         zoom: p.zoom ?? 15.5,
         attributionControl: { compact: true },
@@ -245,7 +259,7 @@ export default function MapView(p: Props) {
     if (!meMarker.current) {
       const d = document.createElement("div");
       d.className = "me-arrow";
-      d.innerHTML = `<div class="me-pulse"></div><svg viewBox="0 0 40 40" width="40" height="40"><path d="M20 4 L32 34 L20 27 L8 34 Z" fill="var(--base)" stroke="#fff" stroke-width="3" stroke-linejoin="round"/></svg>`;
+      d.innerHTML = `<div class="me-pulse"></div><svg viewBox="0 0 40 40" width="40" height="40"><path d="M20 4 L32 34 L20 27 L8 34 Z" style="fill:var(--base);stroke:#fff;stroke-width:3;stroke-linejoin:round"/></svg>`;
       meMarker.current = new maplibregl.Marker({ element: d, rotationAlignment: "map" }).setLngLat(p.me.pos).addTo(m);
     }
     meMarker.current.setLngLat(p.me.pos);

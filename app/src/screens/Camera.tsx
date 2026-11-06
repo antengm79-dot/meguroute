@@ -12,13 +12,18 @@ const VIS: { k: Visibility; label: string; icon: string }[] = [
   { k: "private", label: "自分のみ", icon: "lock" },
 ];
 
-function shrink(src: CanvasImageSource, w: number, h: number): string {
+function shrink(src: CanvasImageSource, w: number, h: number, mirror = false): string {
   const max = 900;
   const k = Math.min(1, max / Math.max(w, h));
   const c = document.createElement("canvas");
   c.width = Math.round(w * k);
   c.height = Math.round(h * k);
-  c.getContext("2d")!.drawImage(src, 0, 0, c.width, c.height);
+  const ctx = c.getContext("2d")!;
+  if (mirror) {
+    ctx.translate(c.width, 0);
+    ctx.scale(-1, 1);
+  }
+  ctx.drawImage(src, 0, 0, c.width, c.height);
   return c.toDataURL("image/jpeg", 0.82);
 }
 
@@ -31,12 +36,14 @@ export default function Camera() {
   const [cam, setCam] = useState<"wait" | "on" | "off">("wait");
   const [vis, setVis] = useState<Visibility>("public");
   const [flash, setFlash] = useState(false);
+  const [facing, setFacing] = useState<"environment" | "user">("environment");
   const shots = (s.trip?.photos ?? []).filter((p) => p.spot === spot);
 
   useEffect(() => {
     let stream: MediaStream | null = null;
+    setCam((c) => (c === "on" ? "on" : "wait"));
     navigator.mediaDevices
-      ?.getUserMedia({ video: { facingMode: "environment", width: { ideal: 1080 }, height: { ideal: 1920 } }, audio: false })
+      ?.getUserMedia({ video: { facingMode: facing, width: { ideal: 1080 }, height: { ideal: 1920 } }, audio: false })
       .then((st) => {
         stream = st;
         if (video.current) {
@@ -48,7 +55,7 @@ export default function Camera() {
       .catch(() => setCam("off"));
     if (!navigator.mediaDevices) setCam("off");
     return () => stream?.getTracks().forEach((t) => t.stop());
-  }, []);
+  }, [facing]);
 
   const pos = (): LngLat => {
     const sh = SHOPS.find((x) => x.name === spot);
@@ -66,7 +73,7 @@ export default function Camera() {
 
   const shoot = () => {
     const v = video.current;
-    if (cam === "on" && v && v.videoWidth) add(shrink(v, v.videoWidth, v.videoHeight));
+    if (cam === "on" && v && v.videoWidth) add(shrink(v, v.videoWidth, v.videoHeight, facing === "user"));
     else add();
   };
 
@@ -90,11 +97,11 @@ export default function Camera() {
         <div className="row" style={{ gap: 6, background: "rgba(255,255,255,.12)", padding: "8px 14px", borderRadius: 18, fontWeight: 700, fontSize: 13 }}>
           <span style={{ width: 8, height: 8, borderRadius: 4, background: "var(--accent)" }} />{spot}
         </div>
-        <span style={{ width: 44 }} />
+        <button className="icon-btn" aria-label={facing === "user" ? "外カメラに切り替え" : "内カメラに切り替え"} style={{ background: "rgba(255,255,255,.1)", color: "#fff", border: "none" }} onClick={() => setFacing(facing === "user" ? "environment" : "user")}><Icon name="flip" /></button>
       </div>
 
       <div style={{ flex: 1, position: "relative", margin: "0 12px", borderRadius: 28, overflow: "hidden", background: "#1A1A40" }}>
-        <video ref={video} playsInline muted style={{ width: "100%", height: "100%", objectFit: "cover", display: cam === "on" ? "block" : "none" }} />
+        <video ref={video} playsInline muted style={{ width: "100%", height: "100%", objectFit: "cover", display: cam === "on" ? "block" : "none", transform: facing === "user" ? "scaleX(-1)" : undefined }} />
         {cam !== "on" && (
           <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 10, padding: 30, textAlign: "center",
             background: "linear-gradient(160deg, color-mix(in srgb, var(--base) 70%, #000), #1A1A40)" }}>

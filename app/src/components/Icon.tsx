@@ -58,6 +58,7 @@ const P: Record<string, string> = {
   image: "M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M15 9h.01",
   download: "M12 4v11M7 10l5 5 5-5M5 20h14",
   layers: "M12 3l9 5-9 5-9-5zM3 13l9 5 9-5",
+  flip: "M4 8h3l2-3h6l2 3h3v11H4zM9 12.5a3.2 3.2 0 0 1 5.6-1.6M15 14a3.2 3.2 0 0 1-5.6 1.6M14.8 9v2h-2M9.2 17v-2h2",
   locate: "M12 3v3M12 18v3M3 12h3M18 12h3M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z",
 };
 
