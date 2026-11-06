@@ -7,7 +7,7 @@ const LOGO = 'data:image/png;base64,' + fs.readFileSync(process.argv[3]).toStrin
 // [柱(0=計画 1=記録 2=共有), 今の操作の説明]
 const PILLARS = [['計画', 'PLAN'], ['記録', 'RECORD'], ['共有', 'SHARE']];
 const STEPS = [
-  [0, '「ルートを決めてから出かける」\nを押す'],
+  [0, '「ルートの計画」を押す'],
   [0, '出発地・到着地を入れて、\n経由地はカテゴリや場所の名前で追加'],
   [0, '質問に答えて、\nお店を比べて選ぶ'],
   [0, 'AIがルートを作成'],

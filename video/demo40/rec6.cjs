@@ -4,7 +4,7 @@
 const { chromium } = require('playwright');
 const fs = require('fs');
 const SHOTS = !!process.env.SHOTS;
-const OUT = __dirname + (SHOTS ? '/slideshots6' : '/rec6');
+const OUT = __dirname + (SHOTS ? '/slideshots7' : '/rec7');
 fs.mkdirSync(OUT, { recursive: true });
 const U = 'https://antengm79-dot.github.io/meguroute/#';
 const b64 = (f, type) => `data:${type};base64,` + fs.readFileSync(f).toString('base64');
@@ -67,7 +67,7 @@ const SPOTS = [
   const scroll = (y) => p.evaluate((y) => document.querySelector('.screen').scrollTo({ top: y, behavior: 'smooth' }), y);
   try {
     await p.goto(U + '/'); await w(9000); mark('home');
-    await w(1000); await tap('text=ルートを決めてから出かける'); await w(1000); mark('plan');
+    await w(1000); await tap('text=ルートの計画'); await w(1000); mark('plan');
     await tap('text=エリアをえらぶ'); await w(600); await tap('.chip:has-text("梅田")'); await w(500);
     await scroll(300); await w(700);
     await tap('input[placeholder="現在地から出発"]'); await w(300); mark('typeStart');
@@ -100,8 +100,8 @@ const SPOTS = [
     await p.mouse.click(195, 60); await w(900);
     await row.evaluate((el) => el.scrollTo({ left: 0, behavior: 'smooth' })); await w(1300);
     await row.locator('button:has-text("喫茶ミナモ")').first().click(); await w(2000);
-    await tap('.sheet >> text=ここにする'); await w(1000);
-    await tap('text=決定してルートを作る'); await w(400); mark('route'); await w(SHOTS ? 14000 : 5500); await shot('route');
+    await tap('.sheet >> text=ここにする'); mark('pick');
+    await p.waitForSelector('text=おすすめルートができました'); mark('route'); await w(SHOTS ? 14000 : 5500); await shot('route');
     await tap('text=旅をスタート'); await w(200); mark('trip');
     let n = 0;
     for (let i = 0; i < 200 && n < 2; i++) {

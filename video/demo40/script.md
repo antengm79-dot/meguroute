@@ -21,4 +21,4 @@
 歩いている場面（倍速）には、スマホ画面の外（左側の説明の下）に「▶▶ 倍速」を表示しています。ロゴは右下です。
 
 録画：`node rec6.cjs <喫茶店の動画.webm> <喫茶店の写真> <公園の動画.webm> <公園の写真>`
-編集：`python3 ../edit.py rec6/up.mp4 segs7.json out.mp4 .`（区間の5番目に true を入れると倍速マークを表示）
+編集：`python3 ../edit.py rec6/up.mp4 segs8.json out.mp4 .`（区間の5番目に true を入れると倍速マークを表示）
