@@ -58,9 +58,8 @@ function mk(slide, k) {
   P.text("⑥ ビジネスモデル", 78, 51, 393, 48, { size: 10.9, bold: true, align: "center" });
   P.text("ユーザーは無料、貯まるデータでお店と自治体から収益を得る", 78, 112, 1500, 76, { size: 17.9, bold: true });
 
-  // phase frames (new): number badge + label, framed so the eye goes 1 → 2 → 3
+  // phase labels: number badge + label so the eye goes 1 → 2 → 3
   const phase = (n, label, title, fx, fy, fw, fh, lx, ly) => {
-    P.box(fx, fy, fw, fh, { line: NAVY, lw: 1.75, r: 0.12, name: `phase ${n} frame` });
     P.circle(lx, ly + 2, 42, { fill: NAVY, name: `phase ${n} badge` });
     P.text(String(n), lx, ly + 2, 42, 42, { size: 11, bold: true, color: MINT, align: "center" });
     P.text(label, lx + 50, ly - 2, 300, 22, { size: 7.8, bold: true, color: MUTED });
