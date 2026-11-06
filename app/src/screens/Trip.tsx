@@ -55,7 +55,7 @@ export default function Trip() {
   }, [free, trip, full]);
 
   const [d, setD] = useState(trip?.progress ?? 0);
-  const [speed, setSpeed] = useState(1);
+  const speed = 1;
   const [ask, setAsk] = useState<string | null>(null);
   const [showTrace, setShowTrace] = useState(false);
   const [follow, setFollow] = useState(true);
@@ -189,11 +189,6 @@ export default function Trip() {
         <button className="icon-btn" aria-label="現在地に追従" style={{ background: follow ? "var(--base)" : "#fff", color: follow ? "#fff" : "var(--base)" }} onClick={() => setFollow(!follow)}>
           <Icon name="nav" size={18} />
         </button>
-        {s.demoWalk && (
-          <button className="icon-btn" aria-label="デモ速度" style={{ fontFamily: "var(--en)", fontWeight: 900, fontSize: 11 }} onClick={() => setSpeed((speed + 1) % SPEEDS.length)}>
-            {speed === 0 ? "||" : `×${speed}`}
-          </button>
-        )}
       </div>
 
       {/* bottom */}
