@@ -140,7 +140,8 @@ input, select, textarea { font-family: inherit; color: inherit; font-size: 16px;
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 
 /* ---- map */
-.map { position: absolute; inset: 0; }
+/* maplibre の .maplibregl-map{position:relative} より強く指定する（本番ビルドでCSSの順番が変わるため） */
+.map, .map.maplibregl-map { position: absolute; inset: 0; }
 .map-offline {
   background-color: #FBFBFE;
   background-image:
