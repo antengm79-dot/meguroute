@@ -66,7 +66,7 @@ export default function Home() {
           <button className="btn accent block glow" style={{ height: 60, fontSize: 17 }} onClick={startFree}>
             <Icon name="playtri" fill="currentColor" size={18} />旅をスタート
           </button>
-          <button className="btn block" onClick={() => nav("/plan")}>
+          <button className="btn block" onClick={() => { set((x) => ({ ...x, plan: { ...x.plan, stops: [] }, answers: {} })); nav("/plan"); }}>
             <Icon name="sparkle" />ルートを決めてから出かける
           </button>
         </div>

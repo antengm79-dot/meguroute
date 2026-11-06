@@ -144,6 +144,9 @@ export default function Plan() {
                 </div>
               );
             })}
+            {p.stops.length === 0 && (
+              <p className="t-small t-muted" style={{ margin: 0 }}>行きたいカテゴリやお店を追加してね</p>
+            )}
             <button className="btn soft" style={{ height: 48 }} onClick={() => setAdding(true)}><Icon name="plus" />経由地を追加</button>
           </div>
 

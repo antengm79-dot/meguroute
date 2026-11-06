@@ -84,11 +84,7 @@ export const defaultPlan = (): Plan => ({
   area: "大阪・梅田〜中之島",
   start: { name: "中百舌鳥駅", pos: [135.503, 34.5562], time: "10:00" },
   end: { name: "北浜駅", pos: [135.5068, 34.6915], time: "18:00" },
-  stops: [
-    { id: "s1", kind: "category", cat: "cafe" },
-    { id: "s2", kind: "category", cat: "shopping" },
-    { id: "s3", kind: "category", cat: "park" },
-  ],
+  stops: [], // 経由地は、ユーザーが選んだものだけを入れる
 });
 
 const initial: State = {
