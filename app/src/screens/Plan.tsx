@@ -72,7 +72,12 @@ export default function Plan() {
     setAdding(false);
     setQ("");
   };
-  const hits = q ? SHOPS.filter((x) => x.name.includes(q) || catOf(x.cat).label.includes(q)).slice(0, 6) : [];
+  // 名前が入力した文字で始まるものを先に、短い名前ほど上に並べる
+  const hits = q
+    ? SHOPS.filter((x) => x.name.includes(q) || catOf(x.cat).label.includes(q))
+        .sort((a, b) => Number(b.name.startsWith(q)) - Number(a.name.startsWith(q)) || a.name.length - b.name.length)
+        .slice(0, 6)
+    : [];
 
   return (
     <div className="screen">
