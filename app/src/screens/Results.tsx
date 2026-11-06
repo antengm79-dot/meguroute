@@ -41,12 +41,12 @@ export default function Results() {
 
   const ready = s.plan.stops.every((st) => chosen[st.id]);
 
-  const decide = async () => {
+  const decide = async (pick: Record<string, string> = chosen) => {
     setBusy(true);
     const spots: TripSpot[] = [
       { name: s.plan.start.name || "現在地", pos: s.plan.start.pos, time: s.plan.start.time },
       ...s.plan.stops.map((st) => {
-        const sh = shopById(chosen[st.id])!;
+        const sh = shopById(pick[st.id])!;
         return { name: sh.name, pos: sh.pos, shopId: sh.id, cat: sh.cat };
       }),
       ...(s.plan.end.name ? [{ name: s.plan.end.name, pos: s.plan.end.pos, time: s.plan.end.time }] : []),
@@ -113,14 +113,20 @@ export default function Results() {
         })}
       </div>
       <div className="bottom-bar">
-        <button className={"btn block" + (ready ? " glow" : "")} style={{ height: 60, fontSize: 17 }} disabled={!ready || busy} onClick={decide}>
+        <button className={"btn block" + (ready ? " glow" : "")} style={{ height: 60, fontSize: 17 }} disabled={!ready || busy} onClick={() => decide()}>
           {ready && !busy && <Icon name="sparkle" />}
           {busy ? "ルートを作成中…" : ready ? "決定してルートを作る" : `あと${s.plan.stops.filter((st) => !chosen[st.id]).length}か所えらんでね`}
         </button>
       </div>
       {detail && (
         <ShopSheet shop={detail.shop} onClose={() => setDetail(null)}
-          onPick={() => { setChosen((c) => ({ ...c, [detail.stopId]: detail.shop.id })); setDetail(null); }} />
+          onPick={() => {
+            const next = { ...chosen, [detail.stopId]: detail.shop.id };
+            setChosen(next);
+            setDetail(null);
+            // 最後の1か所を選んだら、そのままルートを作って表示する
+            if (s.plan.stops.every((st) => next[st.id])) decide(next);
+          }} />
       )}
     </div>
   );
