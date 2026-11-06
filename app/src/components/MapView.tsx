@@ -121,6 +121,7 @@ export default function MapView(p: Props) {
   const [offline, setOffline] = useState(false);
   const markers = useRef<Record<string, maplibregl.Marker[]>>({});
   const meMarker = useRef<maplibregl.Marker | null>(null);
+  const bearingRef = useRef<number | null>(null);
   const cb = useRef(p);
   cb.current = p;
   const [overlay, setOverlay] = useState<HTMLDivElement | null>(null);
@@ -248,8 +249,18 @@ export default function MapView(p: Props) {
       meMarker.current = new maplibregl.Marker({ element: d, rotationAlignment: "map" }).setLngLat(p.me.pos).addTo(m);
     }
     meMarker.current.setLngLat(p.me.pos);
-    meMarker.current.setRotation(p.me.heading);
-    if (p.follow) m.jumpTo({ center: p.me.pos });
+    if (p.follow) {
+      // ナビ表示：矢印は画面の中央で常に上向き、地図のほうが進行方向に回る
+      const cur = bearingRef.current ?? p.me.heading;
+      const delta = ((p.me.heading - cur + 540) % 360) - 180;
+      const b = (cur + delta * 0.12 + 360) % 360;
+      bearingRef.current = b;
+      m.jumpTo({ center: p.me.pos, bearing: b });
+      meMarker.current.setRotation(b);
+    } else {
+      bearingRef.current = null;
+      meMarker.current.setRotation(p.me.heading);
+    }
   }, [ready, p.me, p.follow]);
 
   // fit

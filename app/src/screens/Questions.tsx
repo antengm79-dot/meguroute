@@ -3,7 +3,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import Icon from "../components/Icon";
 import { PinChara } from "../components/ui";
 import { catOf } from "../data/categories";
-import { CATEGORY_QUESTIONS, COMMON_QUESTIONS } from "../data/questions";
+import { CATEGORY_QUESTIONS, COMMON_QUESTIONS, NEUTRAL } from "../data/questions";
 import { useStore } from "../store";
 
 const SUBS = ["ぴったりの場所を探すね！", "もうちょっと教えて！", "キミの好みに仕上げるね！"];
@@ -76,7 +76,7 @@ export default function Questions() {
             </div>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0,1fr))", gap: 10, marginTop: 8 }}>
-            {cur.options.map((o) => {
+            {cur.options.filter((o) => !NEUTRAL.has(o)).map((o) => {
               const on = s.answers[cur.key] === o;
               return (
                 <button key={o} onClick={() => pick(o)}

@@ -10,12 +10,14 @@ import { fmtDist } from "../lib/geo";
 import { totals, tripLen } from "../lib/records";
 import { useStore } from "../store";
 import { LevelCard } from "./MyPage";
+import { CalendarBody } from "./PhotoCalendar";
 
 export default function Records() {
   const { s } = useStore();
   const [q] = useSearchParams();
-  const [tab, setTab] = useState(q.get("tab") === "spots" ? "spots" : "distance");
-  useEffect(() => setTab(q.get("tab") === "spots" ? "spots" : "distance"), [q]);
+  const pick = (v: string | null) => (v === "spots" || v === "photos" ? v : "distance");
+  const [tab, setTab] = useState(pick(q.get("tab")));
+  useEffect(() => setTab(pick(q.get("tab"))), [q]);
   const tot = totals(s.history);
 
   // distance by month (last 4 months)
@@ -38,11 +40,14 @@ export default function Records() {
       <Top back title="おでかけの記録" />
       <div className="screen-pad" style={{ paddingTop: 4 }}>
         <div className="seg" style={{ marginBottom: 14 }}>
-          <button className={tab === "distance" ? "on" : ""} onClick={() => setTab("distance")} style={{ gap: 6, fontWeight: 700 }}><Icon name="walk" size={16} />歩いた距離</button>
-          <button className={tab === "spots" ? "on" : ""} onClick={() => setTab("spots")} style={{ gap: 6, fontWeight: 700 }}><Icon name="pin" size={16} />スポット</button>
+          <button className={tab === "distance" ? "on" : ""} onClick={() => setTab("distance")} style={{ gap: 4, fontWeight: 700, fontSize: 13 }}><Icon name="walk" size={15} />距離</button>
+          <button className={tab === "spots" ? "on" : ""} onClick={() => setTab("spots")} style={{ gap: 4, fontWeight: 700, fontSize: 13 }}><Icon name="pin" size={15} />スポット</button>
+          <button className={tab === "photos" ? "on" : ""} onClick={() => setTab("photos")} style={{ gap: 4, fontWeight: 700, fontSize: 13 }}><Icon name="calendar" size={15} />写真</button>
         </div>
 
-        {tab === "distance" ? (
+        {tab === "photos" ? (
+          <CalendarBody />
+        ) : tab === "distance" ? (
           <div className="col" style={{ gap: 14 }}>
             <div className="card">
               <div className="t-small t-muted">これまでに歩いた距離</div>

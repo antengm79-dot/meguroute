@@ -1,11 +1,11 @@
 import { useMemo, useState } from "react";
 import Icon from "../components/Icon";
-import { Photo, Top } from "../components/ui";
+import { Photo } from "../components/ui";
 import { useStore, type TripPhoto } from "../store";
 
 const key = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 
-export default function PhotoCalendar() {
+export function CalendarBody() {
   const { s } = useStore();
   const all = useMemo(() => {
     const list: (TripPhoto & { trip: string })[] = [];
@@ -36,9 +36,8 @@ export default function PhotoCalendar() {
   const monthCount = all.filter((p) => { const d = new Date(p.at); return d.getMonth() === month.getMonth() && d.getFullYear() === month.getFullYear(); }).length;
 
   return (
-    <div className="screen">
-      <Top back title="写真カレンダー" />
-      <div className="screen-pad" style={{ paddingTop: 4 }}>
+    <div>
+      <div>
         <div className="row between" style={{ marginBottom: 12 }}>
           <button className="icon-btn" aria-label="前の月" onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))}><Icon name="back" /></button>
           <div style={{ textAlign: "center" }}>

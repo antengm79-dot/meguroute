@@ -14,7 +14,6 @@ import Publish from "./screens/Publish";
 import Feed from "./screens/Feed";
 import RouteDetail from "./screens/RouteDetail";
 import MyPage from "./screens/MyPage";
-import PhotoCalendar from "./screens/PhotoCalendar";
 import Records from "./screens/Records";
 import Dress from "./screens/Dress";
 import Follow from "./screens/Follow";
@@ -42,7 +41,6 @@ export function Phone() {
           <Route path="/feed" element={<Feed />} />
           <Route path="/route/:id" element={<RouteDetail />} />
           <Route path="/me" element={<MyPage />} />
-          <Route path="/me/photos" element={<PhotoCalendar />} />
           <Route path="/me/records" element={<Records />} />
           <Route path="/dress" element={<Dress />} />
           <Route path="/follow" element={<Follow />} />

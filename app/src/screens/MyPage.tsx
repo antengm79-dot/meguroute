@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import Icon from "../components/Icon";
 import RouteCard, { MiniRoute } from "../components/RouteCard";
-import { Avatar, LvBadge, Top } from "../components/ui";
+import { Avatar, LvBadge, Photo, Top } from "../components/ui";
 import { FEED, userById } from "../data/routes";
 import { levelInfo } from "../data/themes";
 import { fmtDist } from "../lib/geo";
@@ -30,6 +30,42 @@ export function LevelCard() {
         あと写真{Math.ceil(li.toNext / 12)}枚、またはスポット{Math.ceil(li.toNext / 30)}か所でレベルアップ{unlock ? ` ・ ${unlock}` : ""}
       </div>
     </div>
+  );
+}
+
+/** 今月の小さなカレンダー：おでかけした日に写真が入る */
+function MiniCalendar({ onOpen }: { onOpen: () => void }) {
+  const { s } = useStore();
+  const photos = s.history.flatMap((t) => t.photos.map((p) => ({ ...p, at: p.at || t.startedAt })));
+  const latest = photos.length ? new Date(Math.max(...photos.map((p) => p.at))) : new Date();
+  const y = latest.getFullYear(), m = latest.getMonth();
+  const first = new Date(y, m, 1).getDay();
+  const days = new Date(y, m + 1, 0).getDate();
+  const byDay = new Map<number, (typeof photos)[number]>();
+  for (const p of photos) {
+    const d = new Date(p.at);
+    if (d.getFullYear() === y && d.getMonth() === m && !byDay.has(d.getDate())) byDay.set(d.getDate(), p);
+  }
+  return (
+    <button onClick={onOpen} style={{ border: "none", background: "none", padding: 0, textAlign: "left" }} aria-label="写真カレンダーを開く">
+      <div className="row between" style={{ marginBottom: 8 }}>
+        <b style={{ fontSize: 14 }}>{m + 1}月のおでかけ</b>
+        <span className="t-small t-muted">{byDay.size}日 ・ 写真カレンダー ›</span>
+      </div>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(7, minmax(0,1fr))", gap: 3 }}>
+        {"日月火水木金土".split("").map((w) => <span key={w} style={{ textAlign: "center", fontSize: 9, color: "var(--muted)" }}>{w}</span>)}
+        {Array.from({ length: Math.ceil((first + days) / 7) * 7 }, (_, i) => {
+          const d = i - first + 1;
+          if (d < 1 || d > days) return <span key={i} />;
+          const p = byDay.get(d);
+          return p ? (
+            <Photo key={i} p={p} h={30} r={7}><span style={{ position: "absolute", left: 3, top: 1, fontSize: 9, fontWeight: 700, color: "#fff", textShadow: "0 1px 2px rgba(0,0,0,.5)" }}>{d}</span></Photo>
+          ) : (
+            <span key={i} style={{ height: 30, borderRadius: 7, background: "var(--soft)", fontSize: 9, color: "var(--muted)", padding: "1px 3px" }}>{d}</span>
+          );
+        })}
+      </div>
+    </button>
   );
 }
 
@@ -63,19 +99,26 @@ export default function MyPage() {
           <div style={{ alignSelf: "stretch" }}><LevelCard /></div>
         </div>
 
-        <h2 className="h-ja" style={{ fontSize: 18, margin: "22px 0 10px" }}>累計記録</h2>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0,1fr))", gap: 8 }}>
-          {[
-            [fmtDist(tot.meters), "歩いた距離", "/me/records?tab=distance", "walk"],
-            [String(tot.spots), "スポット", "/me/records?tab=spots", "pin"],
-            [String(tot.photos), "写真", "/me/photos", "camera"],
-          ].map(([v, l, to, ic]) => (
-            <button key={l} className="card" style={{ padding: "14px 6px", textAlign: "center" }} onClick={() => nav(to)}>
-              <Icon name={ic} size={18} style={{ color: "var(--base)" }} />
-              <div style={{ fontFamily: "var(--en)", fontWeight: 900, fontSize: 18, color: "var(--base)" }}>{v}</div>
-              <div className="t-small t-muted row" style={{ justifyContent: "center", gap: 2 }}>{l}<Icon name="arrowR" size={12} /></div>
-            </button>
-          ))}
+        <div className="row between" style={{ margin: "22px 0 10px" }}>
+          <h2 className="h-ja" style={{ fontSize: 18 }}>おでかけの記録</h2>
+          <button className="row" style={{ border: "none", background: "none", gap: 2, fontSize: 13, fontWeight: 700, color: "var(--base)" }} onClick={() => nav("/me/records?tab=distance")}>詳細を見る<Icon name="arrowR" size={14} /></button>
+        </div>
+        <div className="card col" style={{ gap: 14 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(3, minmax(0,1fr))", gap: 8 }}>
+            {[
+              [fmtDist(tot.meters), "歩いた距離", "distance", "walk"],
+              [String(tot.spots), "スポット", "spots", "pin"],
+              [String(tot.photos), "写真", "photos", "camera"],
+            ].map(([v, l, tab, ic]) => (
+              <button key={l} onClick={() => nav(`/me/records?tab=${tab}`)}
+                style={{ border: "none", background: "var(--soft)", borderRadius: 16, padding: "12px 4px", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", gap: 2 }}>
+                <Icon name={ic} size={18} style={{ color: "var(--base)" }} />
+                <span style={{ fontFamily: "var(--en)", fontWeight: 900, fontSize: 18, color: "var(--base)" }}>{v}</span>
+                <span className="t-small t-muted">{l}</span>
+              </button>
+            ))}
+          </div>
+          <MiniCalendar onOpen={() => nav("/me/records?tab=photos")} />
         </div>
 
         <h2 className="h-ja" style={{ fontSize: 18, margin: "24px 0 10px" }}>自分の投稿</h2>

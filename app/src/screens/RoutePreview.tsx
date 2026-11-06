@@ -3,7 +3,7 @@ import MapView from "../components/MapView";
 import Icon from "../components/Icon";
 import { Top } from "../components/ui";
 import { catOf } from "../data/categories";
-import { dist, fmtDist, lineLength } from "../lib/geo";
+import { bearing, dist, fmtDist, lineLength } from "../lib/geo";
 import { theme, useStore, type TripSpot } from "../store";
 
 const STAY: Record<string, number> = { cafe: 60, shopping: 50, park: 40, sweets: 30, gourmet: 60, river: 30, museum: 60 };
@@ -32,7 +32,7 @@ export default function RoutePreview() {
   const trip = s.trip;
   if (!trip) return <Navigate to="/plan" replace />;
   const tl = timeline(trip.spots, s.plan.start.time);
-  const fitPts = trip.planned.length ? trip.planned : trip.spots.map((x) => x.pos);
+  const fitPts = [trip.spots[0].pos, ...(trip.planned.length ? trip.planned : trip.spots.map((x) => x.pos))];
 
   const start = () => {
     set((x) => ({ ...x, trip: x.trip && { ...x.trip, startedAt: Date.now(), walked: [] } }));
@@ -41,7 +41,7 @@ export default function RoutePreview() {
 
   return (
     <div className="screen" style={{ overflow: "hidden" }}>
-      <MapView base={th.base} accent={th.accent} planned={trip.planned} train={trip.train} spots={trip.spots.filter((x) => x.shopId)}
+      <MapView base={th.base} accent={th.accent} me={{ pos: trip.spots[0].pos, heading: bearing(trip.spots[0].pos, (trip.train ?? trip.planned)[1] ?? trip.spots[1].pos) }} planned={trip.planned} train={trip.train} spots={trip.spots.filter((x) => x.shopId)}
         fit={fitPts} fitKey={trip.id} padding={{ top: 80, bottom: 500, left: 50, right: 50 }} />
       <div className="float" style={{ left: 0, right: 0, top: 0 }}><Top back /></div>
       <div className="sheet" style={{ animation: "none", maxHeight: "56%", paddingBottom: 100 }}>
