@@ -18,18 +18,20 @@ assets = sys.argv[4] if len(sys.argv) > 4 else os.path.dirname(os.path.abspath(_
 segs = json.load(open(segs_file))
 tmp = tempfile.mkdtemp(dir=os.path.dirname(os.path.abspath(out)))
 parts = []
-for i, (a, b, speed, step) in enumerate(segs):
+for i, seg in enumerate(segs):
+    a, b, speed, step = seg[:4]
+    badge = len(seg) > 4 and seg[4]
     dur = (b - a) / speed
     part = os.path.join(tmp, f"p{i:02d}.mp4")
     fc = (
         f"[1:v]trim={a}:{b},setpts=(PTS-STARTPTS)/{speed},fps={FPS},"
         f"scale={PW}:{PH}:force_original_aspect_ratio=increase,crop={PW}:{PH},format=rgba[ph];"
         f"[2:v]format=gray,scale={PW}:{PH}[m];[ph][m]alphamerge[phm];"
-        f"[0:v][phm]overlay={PX}:{PY}:shortest=1,format=yuv420p[v]"
+        f"[0:v][phm]overlay={PX}:{PY}:shortest=1" + ("[c];[3:v]format=rgba[bd];[c][bd]overlay={}:{}".format(PX + 14, PY + 160) if badge else "") + ",format=yuv420p[v]"
     )
     subprocess.run(
         [FF, "-y", "-loglevel", "error", "-loop", "1", "-framerate", str(FPS), "-t", f"{dur:.3f}",
-         "-i", os.path.join(assets, f"bg{step}.png"), "-i", src, "-loop", "1", "-i", os.path.join(assets, "mask.png"),
+         "-i", os.path.join(assets, f"bg{step}.png"), "-i", src, "-loop", "1", "-i", os.path.join(assets, "mask.png"), *(["-loop", "1", "-i", os.path.join(assets, "badge.png")] if badge else []),
          "-filter_complex", fc, "-map", "[v]", "-t", f"{dur:.3f}", "-r", str(FPS),
          "-c:v", "libx264", "-preset", "medium", "-crf", "18", "-an", part],
         check=True,
@@ -40,5 +42,5 @@ lst = os.path.join(tmp, "list.txt")
 with open(lst, "w") as f:
     f.writelines(f"file '{p}'\n" for p in parts)
 subprocess.run([FF, "-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", lst, "-c", "copy", "-movflags", "+faststart", out], check=True)
-total = sum((b - a) / s for a, b, s, _ in segs)
+total = sum((s[1] - s[0]) / s[2] for s in segs)
 print(f"wrote {out} ({total:.1f}s)")
