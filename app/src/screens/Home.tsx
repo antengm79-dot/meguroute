@@ -67,7 +67,7 @@ export default function Home() {
             <Icon name="playtri" fill="currentColor" size={18} />旅をスタート
           </button>
           <button className="btn block" onClick={() => { set((x) => ({ ...x, plan: { ...defaultPlan(), date: x.plan.date, mode: x.plan.mode }, answers: {} })); nav("/plan"); }}>
-            <Icon name="sparkle" />ルートを決めてから出かける
+            <Icon name="sparkle" />ルートの計画
           </button>
         </div>
       </div>
