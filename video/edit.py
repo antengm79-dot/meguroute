@@ -27,7 +27,7 @@ for i, seg in enumerate(segs):
         f"[1:v]trim={a}:{b},setpts=(PTS-STARTPTS)/{speed},fps={FPS},"
         f"scale={PW}:{PH}:force_original_aspect_ratio=increase,crop={PW}:{PH},format=rgba[ph];"
         f"[2:v]format=gray,scale={PW}:{PH}[m];[ph][m]alphamerge[phm];"
-        f"[0:v][phm]overlay={PX}:{PY}:shortest=1" + ("[c];[3:v]format=rgba[bd];[c][bd]overlay={}:{}".format(PX + 14, PY + 160) if badge else "") + ",format=yuv420p[v]"
+        f"[0:v][phm]overlay={PX}:{PY}:shortest=1" + ("[c];[3:v]format=rgba[bd];[c][bd]overlay={}:{}".format(78, 700) if badge else "") + ",format=yuv420p[v]"
     )
     subprocess.run(
         [FF, "-y", "-loglevel", "error", "-loop", "1", "-framerate", str(FPS), "-t", f"{dur:.3f}",

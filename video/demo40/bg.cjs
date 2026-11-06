@@ -26,7 +26,7 @@ const html = (i) => `<!doctype html><html><head><meta charset="utf-8">
 <style>
 *{box-sizing:border-box}body{margin:0;width:1920px;height:1080px;overflow:hidden;font-family:'Zen Kaku Gothic New',sans-serif;color:#12133A;
 background:#fff;background-image:linear-gradient(rgba(8,7,143,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(8,7,143,.07) 1px,transparent 1px);background-size:18px 18px;position:relative}
-.logo{position:absolute;left:72px;top:56px;height:64px}
+.logo{position:absolute;right:80px;bottom:48px;height:84px}
 .left{position:absolute;left:90px;top:290px;width:600px}
 .num{width:120px;height:120px;border-radius:60px;background:#08078F;color:#A1F9A1;font-family:Unbounded;font-weight:900;font-size:56px;display:flex;align-items:center;justify-content:center}
 .ttl{font-family:'Dela Gothic One';font-size:96px;color:#08078F;margin:4px 0 22px;line-height:1.1}
